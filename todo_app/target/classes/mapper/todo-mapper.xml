@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cc.todo_app.todo_mapper.TodoMapper">
+
+<select id="selectTodoById" parameterType="int" resultType="com.cc.todo_app.todo.Todo">
+	SELECT 
+		todo_id AS todoId, 
+		todo_name AS todoName, 
+		todo_description AS todoDescription 
+	FROM 
+		todo 
+	WHERE 
+		todo_id = #{id}
+</select>
+
+<select id="selectTodoByName" parameterType='String' resultType="com.cc.todo_app.todo.Todo">
+	SELECT 
+		todo_id AS todoId, 
+		todo_name AS todoName, 
+		todo_description AS todoDescription
+	FROM 
+		todo
+	WHERE
+		todo_name = #{name}
+</select>
+
+<select id="selectAllTodo" resultType="com.cc.todo_app.todo.Todo">
+	SELECT 
+		todo_id AS todoId, 
+		todo_name AS todoName, 
+		todo_description AS todoDescription
+	FROM 
+		todo
+</select>
+
+<insert id="addNewTodo" parameterType="com.cc.todo_app.todo.Todo">
+	INSERT INTO todo (todo_id, todo_name, todo_description)
+	VALUES (#{todo.todoId}, #{todo.todoName}, #{todo.todoDescription})
+</insert>
+
+<update id="modifyTodoSetNewName">
+	UPDATE todo SET
+		todo_name = #{name}
+	WHERE todo_id = #{id}
+</update>
+
+<update id="modifyTodoSetNewDescription">
+	UPDATE todo SET
+		todo_description = #{description}
+	WHERE todo_id = #{id}
+</update>
+
+<delete id="removeTodo">
+	DELETE FROM todo WHERE todo_id = #{id}
+</delete>
+
+</mapper>
