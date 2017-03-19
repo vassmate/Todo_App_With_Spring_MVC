@@ -78,4 +78,38 @@ public class TodoManager {
 		}
 	}
 	
+	public Todo selectDoneById(int id) {
+		try {
+			return todoMapper.selectDoneById(id);
+		} finally {
+			session.close();
+		}
+	}
+	
+	public ArrayList<Todo> selectAllDone() {
+		try {
+			return todoMapper.selectAllDone();
+		} finally {
+			session.close();
+		}
+	}
+	
+	public void addToDone(Todo todo) {
+		try {
+			todoMapper.addToDone(todo);
+			session.commit();
+		} finally {
+			session.close();
+		}
+	}
+	
+	public void removeFromDone(int id) {
+		try {
+			todoMapper.removeFromDone(id);
+			session.commit();
+		} finally {
+			session.close();
+		}
+	}
+	
 }

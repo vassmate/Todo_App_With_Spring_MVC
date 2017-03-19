@@ -8,6 +8,11 @@ public class Todo {
 
 	public Todo() {}
 	
+	public Todo(String name, String description) {
+		todoName = name;
+		todoDescription = description;
+	}
+	
 	public Todo(int id, String name, String description) {
 		todoId = id;
 		todoName = name;

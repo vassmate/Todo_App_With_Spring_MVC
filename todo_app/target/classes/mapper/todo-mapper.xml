@@ -36,24 +36,71 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 </select>
 
 <insert id="addNewTodo" parameterType="com.cc.todo_app.todo.Todo">
-	INSERT INTO todo (todo_id, todo_name, todo_description)
-	VALUES (#{todo.todoId}, #{todo.todoName}, #{todo.todoDescription})
+	INSERT INTO todo (
+		todo_name, 
+		todo_description
+	)
+	VALUES (
+		#{todo.todoName}, 
+		#{todo.todoDescription}
+	)
 </insert>
 
 <update id="modifyTodoSetNewName">
 	UPDATE todo SET
 		todo_name = #{name}
-	WHERE todo_id = #{id}
+	WHERE 
+		todo_id = #{id}
 </update>
 
 <update id="modifyTodoSetNewDescription">
 	UPDATE todo SET
 		todo_description = #{description}
-	WHERE todo_id = #{id}
+	WHERE 
+		todo_id = #{id}
 </update>
 
 <delete id="removeTodo">
-	DELETE FROM todo WHERE todo_id = #{id}
+	DELETE FROM todo
+	WHERE 
+		todo_id = #{id}
+</delete>
+
+<select id="selectDoneById" parameterType="int" resultType="com.cc.todo_app.todo.Todo">
+	SELECT 
+		done_id AS todoId, 
+		done_name AS todoName, 
+		done_description AS todoDescription 
+	FROM 
+		done 
+	WHERE 
+		done_id = #{id}
+</select>
+
+<select id="selectAllDone" resultType="com.cc.todo_app.todo.Todo">
+	SELECT 
+		done_id AS todoId, 
+		done_name AS todoName, 
+		done_description AS todoDescription
+	FROM 
+		done
+</select>
+
+<insert id="addToDone" parameterType="com.cc.todo_app.todo.Todo">
+	INSERT INTO done (
+		done_name, 
+		done_description
+	)
+	VALUES (
+		#{todo.todoName}, 
+		#{todo.todoDescription}
+	)
+</insert>
+
+<delete id="removeFromDone">
+	DELETE FROM done
+	WHERE 
+		done_id = #{id}
 </delete>
 
 </mapper>

@@ -22,7 +22,12 @@ public class TodoController {
 	private TodoManager todoManager;
 
 	/**
-	 * Decides what view model attribute has to be set
+	 * Helper methods for the todo controllers. These are only used with the
+	 * methods which are returning a .jsp page.
+	 */
+
+	/*
+	 * Decides which view model attribute(s) has to be set.
 	 */
 	private void validateSelectedTodo(Todo selectedTodo, Model model) {
 		if (selectedTodo != null) {
@@ -34,14 +39,16 @@ public class TodoController {
 		}
 	}
 
-	/**
-	 * Same as validateSelectedTodo but it sets the err attribute if there is an
-	 * empty list as well
+	/*
+	 * Same as validateSelectedTodo but it sets the "err" attribute if there is
+	 * an empty list as well.
 	 */
 	private void validateTodoList(List<Todo> todoList, Model model) {
 		if (todoList != null) {
 			if (!todoList.isEmpty()) {
 				model.addAttribute("todos", todoList);
+			} else {
+				model.addAttribute("err", "No todos found!");
 			}
 		} else {
 			model.addAttribute("err", "No todos found!");
@@ -49,103 +56,170 @@ public class TodoController {
 	}
 
 	/**
-	 * Get a todo by id and return a JSP page
+	 * Controllers for todos. These methods are using the "todo" table.
+	 */
+
+	/*
+	 * Get a todo by id and return a .jsp page.
 	 */
 	@RequestMapping(value = "/todobyid", method = RequestMethod.GET)
-	public String selectByIdReturnJSP(@RequestParam(value = "id", defaultValue = "1") int id, Model model) {
+	public String selectTodoByIdReturnJspView(@RequestParam(value = "id", defaultValue = "1") int id, Model model) {
 		todoManager = new TodoManager(ConnectionFactory.getSqlSessionFactory().openSession());
 		Todo selectedTodo = todoManager.selectTodoById(id);
 		validateSelectedTodo(selectedTodo, model);
 		return "todobyid";
 	}
 
-	/**
-	 * Get a todo by id and return a JSON object
+	/*
+	 * Get a todo by id and return a JSON view.
 	 */
-	@RequestMapping(value = "/todobyidJSON", method = RequestMethod.GET)
-	public @ResponseBody Todo selectByIdReturnJSON(@RequestParam(value = "id", defaultValue = "1") int id,
-			Model model) {
+	@RequestMapping(value = "/todobyidasjson", method = RequestMethod.GET)
+	public @ResponseBody Todo selectTodoByIdReturnJsonView(@RequestParam(value = "id", defaultValue = "1") int id) {
 		todoManager = new TodoManager(ConnectionFactory.getSqlSessionFactory().openSession());
 		Todo selectedTodo = todoManager.selectTodoById(id);
 		return selectedTodo;
 	}
 
-	/**
-	 * Get a todo by name and return a JSP page
+	/*
+	 * Get a todo by name and return a .jsp page.
 	 */
 	@RequestMapping(value = "/todobyname", method = RequestMethod.GET)
-	public String selectByNameReturnJSP(@RequestParam(value = "name") String name, Model model) {
+	public String selectTodoByNameReturnJspView(@RequestParam(value = "name") String name, Model model) {
 		todoManager = new TodoManager(ConnectionFactory.getSqlSessionFactory().openSession());
 		Todo selectedTodo = todoManager.selectTodoByName(name);
 		validateSelectedTodo(selectedTodo, model);
 		return "todobyname";
 	}
 
-	/**
-	 * Get a todo by name and return a JSON object
+	/*
+	 * Get a todo by name and return a JSON view.
 	 */
-	@RequestMapping(value = "/todobynameJSON", method = RequestMethod.GET)
-	public @ResponseBody Todo selectByNameReturnJSON(@RequestParam(value = "name") String name, Model model) {
+	@RequestMapping(value = "/todobynameasjson", method = RequestMethod.GET)
+	public @ResponseBody Todo selectTodoByNameReturnJsonView(@RequestParam(value = "name") String name) {
 		todoManager = new TodoManager(ConnectionFactory.getSqlSessionFactory().openSession());
 		Todo selectedTodo = todoManager.selectTodoByName(name);
 		return selectedTodo;
 	}
 
-	/**
-	 * Get all todos and return a JSP page
+	/*
+	 * Get all todos and return a .jsp page.
 	 */
 	@RequestMapping(value = "/todos", method = RequestMethod.GET)
-	public String selectAllReturnJSP(Model model) {
+	public String selectAllTodoReturnJspView(Model model) {
 		todoManager = new TodoManager(ConnectionFactory.getSqlSessionFactory().openSession());
 		List<Todo> todoList = todoManager.selectAllTodo();
 		validateTodoList(todoList, model);
 		return "todos";
 	}
 
-	/**
-	 * Get all todos and return a JSON object
+	/*
+	 * Get all todos and return a JSON view.
 	 */
-	@RequestMapping(value = "/todosJSON", method = RequestMethod.GET)
-	public @ResponseBody List<Todo> selectAllReturnJSON(Model model) {
+	@RequestMapping(value = "/todosasjson", method = RequestMethod.GET)
+	public @ResponseBody List<Todo> selectAllTodoReturnJsonView() {
 		todoManager = new TodoManager(ConnectionFactory.getSqlSessionFactory().openSession());
 		List<Todo> todoList = todoManager.selectAllTodo();
 		return todoList;
 	}
 
-	/**
-	 * Database modifier methods
+	/*
+	 * Add new todo to the database.
 	 */
 	@RequestMapping(value = "/addnewtodo", method = RequestMethod.POST)
-	public void addNewTodo(
-			@RequestParam(value = "id") int id, 
-			@RequestParam(value = "name") String name,
+	public void addNewTodo(@RequestParam(value = "name") String name,
 			@RequestParam(value = "description") String description) {
 		todoManager = new TodoManager(ConnectionFactory.getSqlSessionFactory().openSession());
-		Todo todo = new Todo(id, name, description);
+		Todo todo = new Todo(name, description);
 		todoManager.addNewTodo(todo);
 	}
-	
+
+	/*
+	 * Add an existing todo to the todo table.
+	 */
+	@RequestMapping(value = "/addtotodo", method = RequestMethod.POST)
+	public void addTodoFromDone(@RequestParam(value = "id") int id) {
+		TodoManager selectManager = new TodoManager(ConnectionFactory.getSqlSessionFactory().openSession());
+		TodoManager addDoneManager = new TodoManager(ConnectionFactory.getSqlSessionFactory().openSession());
+		TodoManager removeManager = new TodoManager(ConnectionFactory.getSqlSessionFactory().openSession());
+
+		Todo doneTodo = selectManager.selectDoneById(id);
+		addDoneManager.addNewTodo(doneTodo);
+		removeManager.removeFromDone(id);
+	}
+
+	/*
+	 * Set a new name for an existing todo.
+	 */
 	@RequestMapping(value = "/updatetodoname", method = RequestMethod.POST)
-	public void modifyTodoSetNewName(
-			@RequestParam(value = "id") int id, 
-			@RequestParam(value = "name") String name) {
+	public void setNewTodoName(@RequestParam(value = "id") int id, @RequestParam(value = "name") String name) {
 		todoManager = new TodoManager(ConnectionFactory.getSqlSessionFactory().openSession());
 		todoManager.modifyTodoSetNewName(id, name);
 	}
-	
+
+	/*
+	 * Set a new description for an existing todo.
+	 */
 	@RequestMapping(value = "/updatetododescription", method = RequestMethod.POST)
-	public void modifyTodoSetNewDescription(
-			@RequestParam(value = "id") int id, 
+	public void setNewTodoDescription(@RequestParam(value = "id") int id,
 			@RequestParam(value = "description") String description) {
 		todoManager = new TodoManager(ConnectionFactory.getSqlSessionFactory().openSession());
 		todoManager.modifyTodoSetNewDescription(id, description);
 	}
-	
+
+	/*
+	 * Remove a todo from the database.
+	 */
 	@RequestMapping(value = "/removetodo", method = RequestMethod.POST)
-	public void removeTodo(
-			@RequestParam(value = "id") int id) {
+	public void removeFromTodo(@RequestParam(value = "id") int id) {
 		todoManager = new TodoManager(ConnectionFactory.getSqlSessionFactory().openSession());
 		todoManager.removeTodo(id);
 	}
-	
+
+	/**
+	 * Controllers for the done todos. These methods are using the "done" table.
+	 */
+
+	/*
+	 * Select a done todo by it's id.
+	 */
+	@RequestMapping(value = "/donebyidasjson", method = RequestMethod.GET)
+	public @ResponseBody Todo selectDoneByIdReturnJsonView(@RequestParam(value = "id", defaultValue = "1") int id,
+			Model model) {
+		todoManager = new TodoManager(ConnectionFactory.getSqlSessionFactory().openSession());
+		Todo selectedDoneTodo = todoManager.selectDoneById(id);
+		return selectedDoneTodo;
+	}
+
+	/*
+	 * Select all done todos.
+	 */
+	@RequestMapping(value = "/donetodosasjson", method = RequestMethod.GET)
+	public @ResponseBody List<Todo> selectAllDoneReturnJsonView() {
+		todoManager = new TodoManager(ConnectionFactory.getSqlSessionFactory().openSession());
+		List<Todo> doneTodoList = todoManager.selectAllDone();
+		return doneTodoList;
+	}
+
+	/*
+	 * Add an existing todo to the done table.
+	 */
+	@RequestMapping(value = "/addtodone", method = RequestMethod.POST)
+	public void addTodoToDone(@RequestParam(value = "id") int id) {
+		TodoManager selectManager = new TodoManager(ConnectionFactory.getSqlSessionFactory().openSession());
+		TodoManager addDoneManager = new TodoManager(ConnectionFactory.getSqlSessionFactory().openSession());
+		TodoManager removeManager = new TodoManager(ConnectionFactory.getSqlSessionFactory().openSession());
+
+		Todo doneTodo = selectManager.selectTodoById(id);
+		addDoneManager.addToDone(doneTodo);
+		removeManager.removeTodo(id);
+	}
+
+	/*
+	 * Remove the done todo from the database.
+	 */
+	@RequestMapping(value = "/removefromdone", method = RequestMethod.POST)
+	public void removeFromDone(@RequestParam(value = "id") int id) {
+		todoManager = new TodoManager(ConnectionFactory.getSqlSessionFactory().openSession());
+		todoManager.removeFromDone(id);
+	}
 }

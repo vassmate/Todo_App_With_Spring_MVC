@@ -21,4 +21,13 @@ public interface TodoMapper {
 	public void modifyTodoSetNewDescription(@Param("id") int id, @Param("description") String description);
 	
 	public void removeTodo(@Param("id") int id);
+	
+	public Todo selectDoneById(int id);
+	
+	public ArrayList<Todo> selectAllDone();
+	
+	public void addToDone(@Param("todo") Todo todo);
+
+	public void removeFromDone(@Param("id") int id);
+
 }
